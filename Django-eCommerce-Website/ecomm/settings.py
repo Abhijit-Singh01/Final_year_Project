@@ -9,14 +9,13 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-local-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# ALLOWED_HOSTS - handle both comma-separated and single value
+# ALLOWED_HOSTS
 allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '*')
 if allowed_hosts_env == '*':
     ALLOWED_HOSTS = ['*']
 else:
     ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',')]
 
-# Application definition
 SITE_ID = 2
 
 INSTALLED_APPS = [
@@ -26,20 +25,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # Apps
     'products',
     'accounts',
     'home',
-
-    # Django Social Auth
     'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-
-    # Crispy forms
     'django_countries',
     'crispy_forms',
     'crispy_bootstrap4',
@@ -79,14 +72,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecomm.wsgi.application'
 
-# Database
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL', f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
     )
 }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
@@ -94,34 +85,25 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
 ]
 
-# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = '/static/'
+# STATIC FILES - USE MEDIA URL BECAUSE YOUR FILES ARE IN public/media
+STATIC_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'public', 'media')]
 
-# STATICFILES_DIRS - only include if public folder exists
-# This is for additional static files NOT in app-level static folders
-public_static_path = os.path.join(BASE_DIR, 'public')
-if os.path.exists(public_static_path):
-    STATICFILES_DIRS = [public_static_path]
-else:
-    STATICFILES_DIRS = []
+# MEDIA - Keep separate for user uploads
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media_uploads')
+MEDIA_URL = '/uploads/'
 
-# Media files (User uploads)
-MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media')
-MEDIA_URL = '/media/'
-
-# Whitenoise configuration
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Disable Whitenoise compression temporarily
+# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Email config
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -131,11 +113,9 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-# Razorpay Keys
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_SECRET_KEY')
 
-# Auth backends
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
@@ -148,6 +128,5 @@ LOGOUT_REDIRECT_URL = "/"
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# Production domain settings
 DEFAULT_DOMAIN = os.environ.get('DEFAULT_DOMAIN', '127.0.0.1:8000')
 DEFAULT_HTTP_PROTOCOL = 'https' if not DEBUG else 'http'
