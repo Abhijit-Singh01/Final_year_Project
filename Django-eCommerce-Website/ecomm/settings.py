@@ -6,9 +6,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
 # SECURITY
-SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-local-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+
+# FIX 1: ALLOWED_HOSTS - handle both comma-separated and single value
+allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '*')
+if allowed_hosts_env == '*':
+    ALLOWED_HOSTS = ['*']
+else:
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',')]
 
 # Application definition
 SITE_ID = 2
@@ -43,7 +49,7 @@ CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # for static files in production
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -73,7 +79,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ecomm.wsgi.application'
 
-# Database (SQLite fallback, Postgres optional)
+# Database
 DATABASES = {
     'default': dj_database_url.config(
         default=os.environ.get('DATABASE_URL', f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
@@ -97,14 +103,23 @@ USE_TZ = True
 # Static & Media files
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "public/media")]
+
+# FIX 2: STATICFILES_DIRS - check if directory exists
+static_dirs_path = os.path.join(BASE_DIR, "public/media")
+if os.path.exists(static_dirs_path):
+    STATICFILES_DIRS = [static_dirs_path]
+else:
+    STATICFILES_DIRS = []
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'public/media')
 MEDIA_URL = '/media/'
 
+# Whitenoise settings for better static file serving
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Email config (Gmail)
+# Email config
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -131,5 +146,6 @@ LOGOUT_REDIRECT_URL = "/"
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-DEFAULT_DOMAIN = '127.0.0.1:8000'
-DEFAULT_HTTP_PROTOCOL = 'http'
+# FIX 3: Production domain settings
+DEFAULT_DOMAIN = os.environ.get('DEFAULT_DOMAIN', '127.0.0.1:8000')
+DEFAULT_HTTP_PROTOCOL = 'https' if not DEBUG else 'http'
