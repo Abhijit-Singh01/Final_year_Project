@@ -9,7 +9,7 @@ TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key-for-local-dev')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# FIX 1: ALLOWED_HOSTS - handle both comma-separated and single value
+# ALLOWED_HOSTS - handle both comma-separated and single value
 allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '*')
 if allowed_hosts_env == '*':
     ALLOWED_HOSTS = ['*']
@@ -100,21 +100,23 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static & Media files
+# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# FIX 2: STATICFILES_DIRS - check if directory exists
-static_dirs_path = os.path.join(BASE_DIR, "public/media")
-if os.path.exists(static_dirs_path):
-    STATICFILES_DIRS = [static_dirs_path]
+# STATICFILES_DIRS - only include if public folder exists
+# This is for additional static files NOT in app-level static folders
+public_static_path = os.path.join(BASE_DIR, 'public')
+if os.path.exists(public_static_path):
+    STATICFILES_DIRS = [public_static_path]
 else:
     STATICFILES_DIRS = []
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'public/media')
+# Media files (User uploads)
+MEDIA_ROOT = os.path.join(BASE_DIR, 'public', 'media')
 MEDIA_URL = '/media/'
 
-# Whitenoise settings for better static file serving
+# Whitenoise configuration
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -146,6 +148,6 @@ LOGOUT_REDIRECT_URL = "/"
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# FIX 3: Production domain settings
+# Production domain settings
 DEFAULT_DOMAIN = os.environ.get('DEFAULT_DOMAIN', '127.0.0.1:8000')
 DEFAULT_HTTP_PROTOCOL = 'https' if not DEBUG else 'http'
